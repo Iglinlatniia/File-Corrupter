@@ -1,0 +1,26 @@
+import os
+import random
+
+def corrupt_file(file_path):
+    try:
+        if os.path.isfile(file_path) and os.access(file_path, os.W_OK):
+            with open(file_path, 'r+b') as file:
+                content = file.read()
+                
+                # Corrupt the file by overwriting with random data
+                corrupted_content = bytearray(random.getrandbits(8) for _ in range(len(content)))
+                
+                file.seek(0)
+                file.write(corrupted_content)
+                file.truncate()
+            
+            print(f"File {file_path} has been corrupted.")
+        
+        else:
+            print(f"File {file_path} does not exist or is not writable.")
+    
+    except Exception as e:
+        print(f"An error occurred: {e}")
+
+file_path = input("Enter the path to a writable Windows file: ")
+corrupt_file(file_path)
