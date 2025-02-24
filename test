@@ -4,17 +4,24 @@ import random
 def corrupt_file(file_path):
     try:
         if os.path.isfile(file_path) and os.access(file_path, os.W_OK):
+            backup_path = f"{file_path}.bak"
+            if not os.path.exists(backup_path):
+                with open(file_path, 'rb') as original_file:
+                    with open(backup_path, 'wb') as backup_file:
+                        backup_file.write(original_file.read())
+            
+            # Open the file in binary write mode
             with open(file_path, 'r+b') as file:
+                # Read the file content
                 content = file.read()
                 
-                # Corrupt the file by overwriting with random data
                 corrupted_content = bytearray(random.getrandbits(8) for _ in range(len(content)))
                 
                 file.seek(0)
                 file.write(corrupted_content)
                 file.truncate()
             
-            print(f"File {file_path} has been corrupted.")
+            print(f"File {file_path} has been corrupted. Original data backed up to {backup_path}.")
         
         else:
             print(f"File {file_path} does not exist or is not writable.")
@@ -22,5 +29,31 @@ def corrupt_file(file_path):
     except Exception as e:
         print(f"An error occurred: {e}")
 
-file_path = input("Enter the path to a writable Windows file: ")
-corrupt_file(file_path)
+def recover_file(file_path):
+    try:
+        backup_path = f"{file_path}.bak"
+        if os.path.exists(backup_path):
+            with open(backup_path, 'rb') as backup_file:
+                with open(file_path, 'r+b') as target_file:
+                    # Read the backup content and overwrite the target file
+                    target_file.seek(0)
+                    target_file.write(backup_file.read())
+                    target_file.truncate()
+            
+            print(f"File {file Path} has been recovered from {backup Path}.")
+        
+        else:
+            print(f"No backup found for {file Path}.")
+    
+    except Exception as e:
+        print(f"An error occurred: {e}")
+
+action = input("Type 'corrupt' to corrupt or type 'recover' to recover: ")
+if action.lower() == "corrupt":
+    path = input("Enter path of Windows File you want to corrupt: ")
+    corrupt_file(path)
+elif action.lower() == "recover":
+    path = input("Enter path of Windows File you want to recover: ")
+    recover_file(path)
+else:
+    print("Invalid Action.")
